@@ -1,46 +1,59 @@
 // Avraham Bar Ilan 205937949
 
 #include <stdio.h>
-#include <memory.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
+
+struct Command {
+    char commandName[100];
+    char firstCommand[100];
+    int isDone;
+    int IsInBackground;
+    pid_t childPid;
+
+};
+
+void exitWin(){
+    exit(0);
+}
+
+
+char* getFirstWord(char* str){
+    const char *delim = " ";
+    char* firstWord = strtok(str, delim);
+    return firstWord;
+}
+
+char* getLastWord(char* str){
+    char* lastWord = strrchr(str, ' ');
+    if (lastWord) {
+        lastWord++;
+        return lastWord;
+    }
+    return str;
+}
+
 int main() {
-
-    /*commands[0] = "man";
-    commands[1] = "man";
-    commands[2] = NULL;
-    printf("$\n");
-    char temp;
-
-    // clear the buffer
-    scanf("%c", &temp);
-    //fflush(stdout);
-    int i = 0;
-    while(scanf("%[^\n]s", commands[i]) != NULL) {
-        printf("%s\n", commands[i]);
-        i++;
-    }*/
-    /*scanf("%[^\n]s", commands);
-    char *firstCommand = strtok(commands, " ");*/
-
-   // execvp(firstCommand, commands);
+    struct Command listOfCommands[100];
+    int shellIsRunning = 1;
+    char input[100];
+    while(shellIsRunning) {
+        printf("$ ");
+        fflush(stdout);
+        scanf(" %[^\n]", input);
 
 
 
 
-   char *commands[100];
-   char *temp;
-   int i= 0;
-   char input[100];
-   fflush(stdout);
-   scanf(" [^\n]%s", input);
-   temp = strtok(input, " ");
-   while( temp != NULL){
-       commands[i] = temp;
-       temp = strtok(NULL, " ");
-       i++;
-   }
-   printf("%s ", commands[0]);
-   printf("%s", commands[1]);
-   return 0;
+
+
+
+
+        shellIsRunning--;
+    }
+    return 0;
 }

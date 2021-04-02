@@ -79,9 +79,6 @@
 		<Unit filename="/mnt/c/Users/hazak/CLionProjects/Os_Ex1/ex1.c">
 			<Option target="Os_Ex1"/>
 		</Unit>
-		<Unit filename="/mnt/c/Users/hazak/CLionProjects/Os_Ex1/main.c">
-			<Option target="Os_Ex1"/>
-		</Unit>
 		<Unit filename="/mnt/c/Users/hazak/CLionProjects/Os_Ex1/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

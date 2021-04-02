@@ -150,33 +150,6 @@ ex1.c.s:
 	$(MAKE) -f CMakeFiles/Os_Ex1.dir/build.make CMakeFiles/Os_Ex1.dir/ex1.c.s
 .PHONY : ex1.c.s
 
-main.o: main.c.o
-
-.PHONY : main.o
-
-# target to build an object file
-main.c.o:
-	$(MAKE) -f CMakeFiles/Os_Ex1.dir/build.make CMakeFiles/Os_Ex1.dir/main.c.o
-.PHONY : main.c.o
-
-main.i: main.c.i
-
-.PHONY : main.i
-
-# target to preprocess a source file
-main.c.i:
-	$(MAKE) -f CMakeFiles/Os_Ex1.dir/build.make CMakeFiles/Os_Ex1.dir/main.c.i
-.PHONY : main.c.i
-
-main.s: main.c.s
-
-.PHONY : main.s
-
-# target to generate assembly for a file
-main.c.s:
-	$(MAKE) -f CMakeFiles/Os_Ex1.dir/build.make CMakeFiles/Os_Ex1.dir/main.c.s
-.PHONY : main.c.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -189,9 +162,6 @@ help:
 	@echo "... ex1.o"
 	@echo "... ex1.i"
 	@echo "... ex1.s"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
 .PHONY : help
 
 
