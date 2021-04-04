@@ -3,5 +3,3 @@
 
 CMakeFiles/Os_Ex1.dir/ex1.c.o: ../ex1.c
 
-CMakeFiles/Os_Ex1.dir/main.c.o: ../main.c
-
