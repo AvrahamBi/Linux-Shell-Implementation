@@ -45,9 +45,9 @@ void jobs(struct Command list[100], int size) {
             list[i].isDone = 0; // todo maybe delete it
             if(list[i].isInBackground == 1) {
                 printf("%s\n", list[i].commandName);
+                printf("jobs");
                 fflush(stdout);
             }
-
         }
     }
 }
@@ -64,6 +64,12 @@ void history(struct Command list[100], int size) {
             printf("RUNNING\n");
         }
     }
+    printf("history RUNNING\n");
+}
+
+void cd() {
+
+
 }
 
 int main() {
@@ -71,10 +77,11 @@ int main() {
     int shellIsRunning = 1;
     char* firstWord;
     char input[100];
+    char copyOfInput[100]; // todo
     int commandID = 0;
     pid_t pid;
 
-    while(shellIsRunning) {
+    while(1) {
         printf("$ ");
         fflush(stdout);
         scanf(" %[^\n]", input);
@@ -85,6 +92,7 @@ int main() {
         } else {
             listOfCommands[commandID].isInBackground = 0;
         }
+        strcpy(copyOfInput, input); // todo
         strcpy(listOfCommands[commandID].commandName, input);
         listOfCommands[commandID].isDone = 0;
         listOfCommands[commandID].childPid = 0;
@@ -112,20 +120,50 @@ int main() {
 
         } else if(listOfCommands[commandID].isBuiltIn == 0) {
             pid = fork();
-            if(pid < 0) {
+            if (pid < 0) {
                 printf("fork failed\n");
                 fflush(stdout);
             }
             listOfCommands[commandID].childPid = pid;
 
+            // if its the parent
+            if (pid > 0) {
+                // if the command doesnt suppose to be in background
+                if(!listOfCommands[commandID].isInBackground) {
+                    //int waitStatus = waitpid(pid, NULL, 0);
+                    // wait to child
+                    if(waitpid(pid, NULL, 0) == -1) { // todo maybe bug here
+                        printf("An error occured\n");
+                        exitFromShell();
+                    }
+                }
+            }
+            // if its the child process
+            if(pid == 0) { // todo change to zero
+                char delim[] = " ";
+                char *exeCommands[100];
+                int i = 0;
+                char *ptr = strtok(copyOfInput, delim);
+                exeCommands[i] = ptr;
+                while (ptr != NULL) {
+                    ptr = strtok(NULL, delim);
+                    i++;
+                    exeCommands[i] = ptr;
+                }
+                exeCommands[i + 1] = NULL;
+                //int status = execvp(exeCommands[0], exeCommands);
+                if (execvp(exeCommands[0], exeCommands) == -1) {// todo maybe bug here
+                    printf("exec failed\n");
+                    fflush(stdout);
+                    exitFromShell();
 
-
+                }
+            }
         }
 
 
 
         commandID++;
-        shellIsRunning--;
     }
     return 0;
 }
