@@ -64,7 +64,7 @@ void history(struct Command list[100], int size) {
             printf("RUNNING\n");
         }
     }
-    printf("history RUNNING\n");
+    //printf("history RUNNING\n"); // todo fix the running/done history issue
 }
 
 void cd() {
@@ -138,7 +138,7 @@ int main() {
                     }
                 }
             }
-            // if its the child process
+            // if its child process
             if(pid == 0) { // todo change to zero
                 char delim[] = " ";
                 char *exeCommands[100];
@@ -156,13 +156,9 @@ int main() {
                     printf("exec failed\n");
                     fflush(stdout);
                     exitFromShell();
-
                 }
             }
         }
-
-
-
         commandID++;
     }
     return 0;
