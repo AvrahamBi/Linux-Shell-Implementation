@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 
 struct Command {
@@ -64,7 +71,92 @@ void history(struct Command list[100], int size) {
     list[size].isDone = 1;
 }
 
-void cd() {
+
+int numOfWords(char *string)
+{
+    int counter = 0 , i, len;
+    char lastC;
+    len = strlen(string);
+    if(len > 0){
+        lastC = string[0];
+    }
+    for(i = 0; i <= len; i++){
+        if((string[i] == ' ' || string[i] == '\0') && lastC != ' '){
+            counter++;
+        }
+        lastC = string[i];
+    }
+    return counter;
+}
+
+
+void cd(struct Command list[100], int size, char *lastPath) {
+    char cdCommand[100];
+    char currentPath[100];
+    //char lastPath[100];
+    strcpy(cdCommand, list[size].commandName);
+    if (getcwd(currentPath, sizeof(currentPath)) == NULL) {
+        printf("An error occurred\n");
+        return;
+    }
+    int chdirStatus;
+    int numOfFlags = numOfWords(cdCommand);
+    // it the command doesnt have flags
+    // and only contains cd
+    if (numOfFlags == 1) {
+        chdirStatus = chdir(getenv("HOME"));
+        if (0 <= chdirStatus) {
+            strcpy(lastPath, currentPath);
+        } else {
+            printf("chdir failed\n");
+        }
+        return;
+    }
+    //if there are too many flags
+    if(2 < numOfFlags) {
+        printf("Too many arguments\n");
+        return;
+    }
+    // if command has flag
+    char cdFlag = getLastWord(cdCommand);
+
+    if (strstr(cdCommand, "~")) {
+        if (numOfFlags == 2){
+            //strcpy(currentPath, getenv("HOME"));
+            if ((chdir(getenv("HOME"))) < 0) {
+                printf("chdir failed\n");
+                return;
+            } else {
+                strcpy(lastPath, currentPath);
+                return;
+            }
+        }
+    }
+
+    if (strcmp(cdFlag, "-") == 0){
+        if ((chdir(lastPath)) < 0) {
+            printf("chdir failed\n");
+            return;
+        } else {
+
+            strcpy(lastPath, currentPath);
+            return;
+        }
+    }
+    if (strcmp(cdFlag, ". .") == 0){
+        if ((chdir(lastPath)) < 0) {
+            printf("chdir failed\n");
+            return;
+        } else {
+
+            strcpy(lastPath, currentPath);
+            return;
+        }
+    }
+
+
+
+
 
 
 }
@@ -76,6 +168,7 @@ int main() {
     char input[100];
     char copyOfInput[100];
     int commandID = 0;
+    char lastPath[100];
     pid_t pid;
 
     while(1) {
@@ -105,7 +198,7 @@ int main() {
                 history(listOfCommands, commandID);
             }
             if(strcmp(firstWord, "cd") == 0){
-
+                cd(listOfCommands, commandID, lastPath);
             }
             if(strcmp(firstWord, "exit") == 0){
                 exitFromShell();
