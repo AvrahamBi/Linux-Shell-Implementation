@@ -55,10 +55,10 @@ void history(struct Command list[100], int size) {
         strcpy(commandNameCopy, list[i].commandName);
         if (((waitpid(list[i].childPid, NULL, WNOHANG) == 0) || isLastCommand) && !list[i].isDone ) {
             printf("%s ", commandNameCopy);
-            printf("RUNNING\n");
+            printf("RUNNING\n"); // todo
         } else {
             printf("%s ", commandNameCopy);
-            printf("DONE\n");
+            printf("DONE\n"); // todo
         }
     }
     list[size].isDone = 1;
@@ -137,6 +137,8 @@ int main() {
     char* firstWord;
     char input[100];
     char copyOfInput[100];
+    char echoInput[100];
+    char copyForFirstWord[100];
     int commandID = 0;
     char lastPath[100];
     pid_t pid;
@@ -145,10 +147,27 @@ int main() {
         printf("$ ");
         fflush(stdout);
         scanf(" %[^\n]", input);
+        strcpy(copyForFirstWord, input);
+        firstWord = getFirstWord(copyForFirstWord);
+        if(strcmp(firstWord, "echo") == 0) {
+            int i = 0;
+            int counter = 0;
+            for (; i < strlen(input); i++) {
+
+                char currentChar;
+                currentChar = input[i];
+                if (currentChar != '"') {
+                    echoInput[counter] = currentChar;
+                    counter++;
+                }
+
+            }
+            strcpy(input, echoInput);
+        }
 
         if (strcmp(getLastWord(input), "&") == 0) {
             listOfCommands[commandID].isInBackground = 1;
-            input[strlen(input) - 1] = 0;
+            input[strlen(input) - 2] = '\0'; // todo was 0
         } else {
             listOfCommands[commandID].isInBackground = 0;
         }
@@ -156,7 +175,7 @@ int main() {
         strcpy(listOfCommands[commandID].commandName, input);
         listOfCommands[commandID].isDone = 0;
         listOfCommands[commandID].childPid = 0;
-        firstWord = getFirstWord(input);
+        //firstWord = getFirstWord(input);
         // if command is a built in function
         if(strcmp(firstWord, "jobs") == 0  || strcmp(firstWord, "history") == 0
            || strcmp(firstWord, "cd") == 0 || strcmp(firstWord, "exit") == 0) {
@@ -172,18 +191,6 @@ int main() {
             }
             if(strcmp(firstWord, "exit") == 0){
                 exitFromShell();
-            }
-            if(strcmp(firstWord, "echo") == 0) {
-                char* echoInput;
-                strcpy(echoInput, input);
-                int i = 0;
-                for (; i < strlen(echoInput); i++) {
-                    if (strcmp(echoInput[i], '"') == 0) {
-                        echoInput[i] = '\0';
-                    }
-
-                }
-
             }
             // if command is not a built in function
         } else {
