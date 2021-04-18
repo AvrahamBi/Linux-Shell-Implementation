@@ -5,13 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 
 struct Command {
@@ -91,74 +84,51 @@ int numOfWords(char *string)
 
 
 void cd(struct Command list[100], int size, char *lastPath) {
+    char* homePath = getenv("HOME");
+    char* newPath;
     char cdCommand[100];
     char currentPath[100];
     //char lastPath[100];
     strcpy(cdCommand, list[size].commandName);
+    char* flags = cdCommand;
+    flags += 3;
+
     if (getcwd(currentPath, sizeof(currentPath)) == NULL) {
         printf("An error occurred\n");
         return;
     }
-    int chdirStatus;
-    int numOfFlags = numOfWords(cdCommand);
-    // it the command doesnt have flags
-    // and only contains cd
-    if (numOfFlags == 1) {
-        chdirStatus = chdir(getenv("HOME"));
-        if (0 <= chdirStatus) {
-            strcpy(lastPath, currentPath);
-        } else {
-            printf("chdir failed\n");
-        }
-        return;
-    }
+    //int chdirStatus;
+
     //if there are too many flags
-    if(2 < numOfFlags) {
+    if(2 < numOfWords(cdCommand)) {
         printf("Too many arguments\n");
         return;
     }
-    // if command has flag
-    char cdFlag = getLastWord(cdCommand);
-
-    if (strstr(cdCommand, "~")) {
-        if (numOfFlags == 2){
-            //strcpy(currentPath, getenv("HOME"));
-            if ((chdir(getenv("HOME"))) < 0) {
-                printf("chdir failed\n");
-                return;
-            } else {
-                strcpy(lastPath, currentPath);
-                return;
-            }
-        }
-    }
-
-    if (strcmp(cdFlag, "-") == 0){
-        if ((chdir(lastPath)) < 0) {
+    // the command cd ~ comes alone without path
+    if (strcmp(flags, "~") == 0 && strcmp(getLastWord(cdCommand), flags) == 0) {
+        if (chdir(homePath) == -1) {
             printf("chdir failed\n");
             return;
         } else {
-
-            strcpy(lastPath, currentPath);
             return;
         }
     }
-    if (strcmp(cdFlag, ". .") == 0){
-        if ((chdir(lastPath)) < 0) {
+    if (strcmp(flags, "~") == 0) {
+        // flags++;
+        // newPath = strcat(homePath, flags);
+        if (chdir(strcat(homePath, ++flags)) == -1) {
             printf("chdir failed\n");
             return;
         } else {
-
-            strcpy(lastPath, currentPath);
             return;
         }
     }
-
-
-
-
-
-
+    if(chdir(flags) == -1){
+        printf("chdir failed\n");
+        return;
+    } else {
+        return;
+    }
 }
 
 int main() {
@@ -189,7 +159,7 @@ int main() {
         firstWord = getFirstWord(input);
         // if command is a built in function
         if(strcmp(firstWord, "jobs") == 0  || strcmp(firstWord, "history") == 0
-            || strcmp(firstWord, "cd") == 0 || strcmp(firstWord, "exit") == 0) {
+           || strcmp(firstWord, "cd") == 0 || strcmp(firstWord, "exit") == 0) {
             listOfCommands[commandID].isBuiltIn = 1;
             if(strcmp(firstWord, "jobs") == 0){
                 jobs(listOfCommands, commandID);
@@ -203,7 +173,19 @@ int main() {
             if(strcmp(firstWord, "exit") == 0){
                 exitFromShell();
             }
-        // if command is not a built in function
+            if(strcmp(firstWord, "echo") == 0) {
+                char* echoInput;
+                strcpy(echoInput, input);
+                int i = 0;
+                for (; i < strlen(echoInput); i++) {
+                    if (strcmp(echoInput[i], '"') == 0) {
+                        echoInput[i] = '\0';
+                    }
+
+                }
+
+            }
+            // if command is not a built in function
         } else {
             pid = fork();
             if (pid < 0) {
