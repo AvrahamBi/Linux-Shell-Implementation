@@ -1,4 +1,4 @@
-// Avraham Bar Ilan 205937949
+// Avraham Bar Ilan
 
 #include <stdio.h>
 #include <sys/wait.h>
@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 
+// the Command struct
 struct Command {
     char commandName[100];
     int isDone;
@@ -15,18 +16,21 @@ struct Command {
     pid_t childPid;
 
 };
-
+// exit from shell built in function
 void exitFromShell(){
     exit(0);
 }
-
-
+/* function that get a string and returns
+    the first word of it
+*/
 char* getFirstWord(char* str){
     const char *delim = " ";
     char* firstWord = strtok(str, delim);
     return firstWord;
 }
-
+/* function that get a string and returns
+    the last word of it
+*/
 char* getLastWord(char* str){
     char* lastWord = strrchr(str, ' ');
     if (lastWord) {
@@ -35,36 +39,44 @@ char* getLastWord(char* str){
     }
     return str;
 }
-
+/* built in function that prints all the running tasks
+*/
 void jobs(struct Command list[100], int size) {
     int i = 0;
+    // iterates over the command list
     for(; i <= size; i++) {
+        // if a task is in background and still running
         if (list[i].isInBackground && !list[i].isDone) {
             printf("%s\n", list[i].commandName);
         }
     }
     list[size].isDone = 1;
 }
-
+// function that prints all the commands from the
+// beginning of the shell run
 void history(struct Command list[100], int size) {
     int i = 0;
     int isLastCommand = 0;
     char commandNameCopy[100];
+    // iterate over the commands list
     for(; i <= size; i++) {
         if (i == size) {isLastCommand = 1;}
         strcpy(commandNameCopy, list[i].commandName);
+        // if the task is still running
         if (((waitpid(list[i].childPid, NULL, WNOHANG) == 0) || isLastCommand) && !list[i].isDone ) {
             printf("%s ", commandNameCopy);
-            printf("RUNNING\n"); // todo
+            printf("RUNNING\n");
         } else {
+            // is task is done
             printf("%s ", commandNameCopy);
-            printf("DONE\n"); // todo
+            printf("DONE\n");
         }
     }
     list[size].isDone = 1;
 }
 
-
+// function that returns how many
+// words in a string
 int numOfWords(char *string)
 {
     int counter = 0 , i, len;
@@ -73,7 +85,9 @@ int numOfWords(char *string)
     if(len > 0){
         lastC = string[0];
     }
+    // iterates over the string
     for(i = 0; i <= len; i++){
+        // if the char is space or null
         if((string[i] == ' ' || string[i] == '\0') && lastC != ' '){
             counter++;
         }
@@ -82,22 +96,24 @@ int numOfWords(char *string)
     return counter;
 }
 
-
+// a built in function that take the job of the cd command
 void cd(struct Command list[100], int size, char *lastPath) {
     char* homePath = getenv("HOME");
     char* newPath;
     char cdCommand[100];
     char currentPath[100];
-    //char lastPath[100];
+    // copy the name of the command to prevent problems
+    // while changing the name
     strcpy(cdCommand, list[size].commandName);
     char* flags = cdCommand;
+    // make the pointer points to the first flag
+    // of the command, and skip cd
     flags += 3;
 
     if (getcwd(currentPath, sizeof(currentPath)) == NULL) {
         printf("An error occurred\n");
         return;
     }
-    //int chdirStatus;
     int sizeOfCommand = numOfWords(cdCommand);
     //if there are too many flags
     if(2 < sizeOfCommand) {
@@ -114,6 +130,7 @@ void cd(struct Command list[100], int size, char *lastPath) {
             return;
         }
     }
+    // if command is only cd -
     if (strcmp(flags, "-") == 0 && strcmp(getLastWord(cdCommand), flags) == 0) {
         if (chdir(lastPath) == -1) {
             printf("chdir failed\n");
@@ -133,9 +150,8 @@ void cd(struct Command list[100], int size, char *lastPath) {
             return;
         }
     }
+    // if flag is ~
     if (strcmp(flags, "~") == 0) {
-        // flags++;
-        // newPath = strcat(homePath, flags);
         if (chdir(strcat(homePath, ++flags)) == -1) {
             printf("chdir failed\n");
             return;
@@ -165,20 +181,21 @@ int main() {
     char lastPath[100];
     pid_t pid;
 
+    // the loop of the shell
     while(1) {
         printf("$ ");
         fflush(stdout);
         scanf(" %[^\n]", input);
         strcpy(copyForFirstWord, input);
         firstWord = getFirstWord(copyForFirstWord);
+        // if its echo remove the "" and the ''
         if(strcmp(firstWord, "echo") == 0) {
             int i = 0;
             int counter = 0;
             for (; i < strlen(input); i++) {
-
                 char currentChar;
                 currentChar = input[i];
-                if (currentChar != '"') {
+                if (currentChar != '"' && currentChar != 39) { // 39 is the ascii value of '
                     echoInput[counter] = currentChar;
                     counter++;
                 }
@@ -186,10 +203,10 @@ int main() {
             }
             strcpy(input, echoInput);
         }
-
+        // if the command meant to be in background
         if (strcmp(getLastWord(input), "&") == 0) {
             listOfCommands[commandID].isInBackground = 1;
-            input[strlen(input) - 2] = '\0'; // todo was 0
+            input[strlen(input) - 2] = '\0';
         } else {
             listOfCommands[commandID].isInBackground = 0;
         }
@@ -197,7 +214,6 @@ int main() {
         strcpy(listOfCommands[commandID].commandName, input);
         listOfCommands[commandID].isDone = 0;
         listOfCommands[commandID].childPid = 0;
-        //firstWord = getFirstWord(input);
         // if command is a built in function
         if(strcmp(firstWord, "jobs") == 0  || strcmp(firstWord, "history") == 0
            || strcmp(firstWord, "cd") == 0 || strcmp(firstWord, "exit") == 0) {
