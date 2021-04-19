@@ -104,11 +104,22 @@ void cd(struct Command list[100], int size, char *lastPath) {
         printf("Too many arguments\n");
         return;
     }
+    // if command is only cd
     if (1 == sizeOfCommand) {
         if (chdir(homePath) == -1) {
             printf("chdir failed\n");
             return;
         } else {
+            strcpy(lastPath, currentPath);
+            return;
+        }
+    }
+    if (strcmp(flags, "-") == 0 && strcmp(getLastWord(cdCommand), flags) == 0) {
+        if (chdir(lastPath) == -1) {
+            printf("chdir failed\n");
+            return;
+        } else {
+            strcpy(lastPath, currentPath);
             return;
         }
     }
@@ -118,6 +129,7 @@ void cd(struct Command list[100], int size, char *lastPath) {
             printf("chdir failed\n");
             return;
         } else {
+            strcpy(lastPath, currentPath);
             return;
         }
     }
@@ -128,6 +140,7 @@ void cd(struct Command list[100], int size, char *lastPath) {
             printf("chdir failed\n");
             return;
         } else {
+            strcpy(lastPath, currentPath);
             return;
         }
     }
@@ -135,6 +148,7 @@ void cd(struct Command list[100], int size, char *lastPath) {
         printf("chdir failed\n");
         return;
     } else {
+        strcpy(lastPath, currentPath);
         return;
     }
 }
