@@ -98,11 +98,19 @@ void cd(struct Command list[100], int size, char *lastPath) {
         return;
     }
     //int chdirStatus;
-
+    int sizeOfCommand = numOfWords(cdCommand);
     //if there are too many flags
-    if(2 < numOfWords(cdCommand)) {
+    if(2 < sizeOfCommand) {
         printf("Too many arguments\n");
         return;
+    }
+    if (1 == sizeOfCommand) {
+        if (chdir(homePath) == -1) {
+            printf("chdir failed\n");
+            return;
+        } else {
+            return;
+        }
     }
     // the command cd ~ comes alone without path
     if (strcmp(flags, "~") == 0 && strcmp(getLastWord(cdCommand), flags) == 0) {
